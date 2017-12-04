@@ -7,8 +7,6 @@
         <li><a href="{% url 'address_books:categorys' 1 %}">分组首页</a></li>
         <li><a href="{% url 'address_books:category' category.id 1 %}">{{ category }}</a></li>
     </ol>
-
-    {#    <p>分组: <a href="{% url 'address_books:category' category.id 1 %}">{{ category }}</a>,<a href="{% url 'address_books:new_entry' category.id %}">添加</a>.</p>#}
     {% if count == 0 %}
         <p>该分组还没有联系人，现在<a href="{% url 'address_books:new_entry' category.id %}" >添加</a>.</p>
     {% else %}
@@ -45,7 +43,6 @@
                         </tr>
                     {% endfor %}
 
-
                     <!-- 模态框（Modal） -->
                     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
@@ -69,24 +66,6 @@
                             </div><!-- /.modal-content -->
                         </div><!-- /.modal -->
                     </div>
-
-                    <script type="text/javascript">
-                        function setname(name, entry_id){
-                            document.getElementById('lable_name').innerHTML = name.toString();
-                            href_str = document.getElementById('delete_submit').href;
-                            var split = href_str.split('/');
-                            var new_str = "";
-                            split[split.length-2] = entry_id.toString();
-                            for(var i=0; i<split.length; i++){
-                                new_str += split[i];
-                                if(i != split.length-1) {
-                                    new_str += '/';
-                                }
-                            }
-                            document.getElementById('delete_submit').href = new_str;
-                        }
-                    </script>
-
 
                     </tbody>
                 </table>

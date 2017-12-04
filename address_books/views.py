@@ -20,6 +20,7 @@ def check_user(user, owner):
     if user != owner:
         raise Http404
 
+
 #显示分组
 #categorys_page:当前请求需要显示第几页
 @login_required
