@@ -20,8 +20,8 @@ def check_user(user, owner):
     if user != owner:
         raise Http404
 
-
-#categorys_page表示当前需要显示的页数
+#显示分组
+#categorys_page:当前请求需要显示第几页
 @login_required
 def categorys(request, categorys_page):
     categorys = Category.objects.filter(owner=request.user).order_by('date_added')
@@ -35,6 +35,9 @@ def categorys(request, categorys_page):
     return render(request, 'address_books/categorys.html', context)
 
 
+#显示分组中的联系人
+#category_id:当前分组id
+#category_page:当前对应的分组的需要显示第几页
 @login_required
 def category(request, category_id, category_page):
     category = Category.objects.get(id=category_id)
@@ -52,6 +55,7 @@ def category(request, category_id, category_page):
     return render(request, 'address_books/category.html', context)
 
 
+#添加新的分组
 @login_required
 def new_category(request):
     if request.method != 'POST':
@@ -66,7 +70,7 @@ def new_category(request):
     context = {'form':form}
     return render(request, 'address_books/new_category.html', context)
 
-
+#编辑分组
 @login_required
 def edit_category(request, category_id):
     category = Category.objects.get(id=category_id)
@@ -82,6 +86,8 @@ def edit_category(request, category_id):
     return render(request, 'address_books/edit_category.html', context)
 
 
+#编辑联系人条目
+@login_required
 def edit_entry(request, entry_id):
     entry = Entry.objects.get(id=entry_id)
     category = entry.category
@@ -103,6 +109,8 @@ def edit_entry(request, entry_id):
     return render(request, 'address_books/edit_entry.html', context)
 
 
+#删除条目
+@login_required
 def delete_entry(request, category_id, category_page, entry_id):
     try:
         entries = Entry.objects.filter(id=str(entry_id))
@@ -113,12 +121,15 @@ def delete_entry(request, category_id, category_page, entry_id):
     context = {'category_id': category_id, 'category_page': category_page}
     return HttpResponseRedirect(reverse('address_books:category', args=[category_id, category_page]))
 
+#删除分组
+@login_required
 def delete_category(request, categorys_page, category_id):
     category = Category.objects.get(id=category_id)
     category.delete()
     return HttpResponseRedirect(reverse('address_books:categorys', args=[categorys_page,]))
 
 
+#添加新的联系人条目
 @login_required
 def new_entry(request, category_id):
     category = Category.objects.get(id=category_id)
@@ -137,6 +148,7 @@ def new_entry(request, category_id):
     return render(request, 'address_books/new_entry.html', context)
 
 
+#搜索联系人条目
 @login_required
 def search(request):
     if request.POST:
