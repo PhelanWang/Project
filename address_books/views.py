@@ -72,6 +72,7 @@ def new_category(request):
     return render(request, 'address_books/new_category.html', context)
 
 #编辑分组
+#category_id:分组id
 @login_required
 def edit_category(request, category_id):
     category = Category.objects.get(id=category_id)
@@ -88,6 +89,7 @@ def edit_category(request, category_id):
 
 
 #编辑联系人条目
+#entry_id:条目id
 @login_required
 def edit_entry(request, entry_id):
     entry = Entry.objects.get(id=entry_id)
@@ -111,6 +113,9 @@ def edit_entry(request, entry_id):
 
 
 #删除条目
+#categroy_id:要删除的条目的分组id
+#category_page:当前条目所在的页数
+#entry_id:条目id
 @login_required
 def delete_entry(request, category_id, category_page, entry_id):
     try:
@@ -123,6 +128,8 @@ def delete_entry(request, category_id, category_page, entry_id):
     return HttpResponseRedirect(reverse('address_books:category', args=[category_id, category_page]))
 
 #删除分组
+#category_page:当前分组所在的页数
+#category_id:当前分组的id
 @login_required
 def delete_category(request, categorys_page, category_id):
     category = Category.objects.get(id=category_id)
@@ -131,6 +138,7 @@ def delete_category(request, categorys_page, category_id):
 
 
 #添加新的联系人条目
+#category_id:当前分组id
 @login_required
 def new_entry(request, category_id):
     category = Category.objects.get(id=category_id)
