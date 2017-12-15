@@ -1,0 +1,14 @@
+{% extends "address_books/base.html" %}
+{% load bootstrap3 %}
+{% block content %}
+    <p>添加一个联系人分组：</p>
+    <form href="{% url 'address_books:new_category' %}" method='post'>
+        {% csrf_token %}
+        {% bootstrap_form form  %}
+        {% buttons %}
+            <button name="commit" class ="btn btn-lg btn-primary"><span class="glyphicon glyphicon-plus"></span> 添加</button>
+        {% endbuttons %}
+    </form>
+{% endblock content %}
+
+
