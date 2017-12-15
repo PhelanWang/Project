@@ -2,6 +2,8 @@ from django.conf.urls import url
 
 from . import views
 
+from rest_framework.urlpatterns import format_suffix_patterns
+
 urlpatterns = [
 	url(r'^$', views.index, name='index'),
     url(r'^categorys/(?P<categorys_page>\d+)/$', views.categorys, name='categorys'),
@@ -14,4 +16,41 @@ urlpatterns = [
     url(r'^delete_category/(?P<categorys_page>\d+)/(?P<category_id>\d+)/$', views.delete_category, name='delete_category'),
     url(r'^test$', views.test, name='test'),
     url(r'^search$', views.search, name='search'),
+
+
+    url(r'^category/$', views.CategoryList.as_view()),
+    url(r'^category/(?P<pk>[0-9]+)/$', views.CategoryDetail.as_view()),
+
+    url(r'^entry/$', views.EntryList.as_view()),
+    url(r'^entry/(?P<pk>[0-9]+)/$', views.EntryDetail.as_view()),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -9,8 +9,41 @@ from django.shortcuts import render
 from .models import Category, Entry
 from .forms import CategoryForm, EntryForm
 
+
+import django_filters
+from rest_framework import viewsets, filters
+from .serializer import CategorySerializer, EntrySerializer
+from rest_framework import generics
+from django.contrib.auth.models import User
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+
+from rest_framework import permissions
 # Create your views here.
 
+
+class CategoryList(generics.ListCreateAPIView):
+    #创建前先设置owner
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+#自己写的方法要自己处理异常,用Response
+class EntryList(generics.ListCreateAPIView):
+    queryset = Entry.objects.all()
+    serializer_class = EntrySerializer
+
+
+class EntryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Entry.objects.all()
+    serializer_class = EntrySerializer
 
 def index(request):
     return render(request, 'address_books/index.html')

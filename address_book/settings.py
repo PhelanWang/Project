@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     
     'address_books',
     'users',
+
+    'rest_framework'
 ]
 
 MIDDLEWARE = [

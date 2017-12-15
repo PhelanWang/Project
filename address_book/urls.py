@@ -17,8 +17,15 @@ from django.conf.urls import include, url
 from django.contrib import admin
 import settings
 
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'', include('address_books.urls', namespace='address_books')),
-    url(r'^users/', include('users.urls', namespace='users')),
+    # url(r'', include('address_books.urls', namespace='address_books')),
+    # url(r'^users/', include('users.urls', namespace='users')),
+
+    url(r'^api/', include('address_books.urls', namespace='address_books')),
+]
+
+urlpatterns += [
+    url(r'^api-auth/', include('users.urls', namespace='users'))
 ]
