@@ -43,8 +43,14 @@ INSTALLED_APPS = [
     'address_books',
     'users',
 
-    'rest_framework'
+    'rest_framework',
+
+    'corsheaders',
 ]
+# MEDDLEWARE_CLASSES = (
+#     'corsheaders.middleware.CorsMiddleware',
+#     'django.middleware.common.CommonMiddleware',
+# )
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -55,6 +61,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 5,
+}
+
 
 ROOT_URLCONF = 'address_book.urls'
 

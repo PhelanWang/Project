@@ -12,46 +12,243 @@ from .forms import CategoryForm, EntryForm
 
 import django_filters
 from rest_framework import viewsets, filters
-from .serializer import CategorySerializer, EntrySerializer
+from .serializer import CategorySerializer, EntrySerializer, UserSerializer
 from rest_framework import generics
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
+
+from permissions import permissions
+
+from permissions import IsOwnerOrReadOnly
+from rest_framework.views import APIView
 
 
-from rest_framework import permissions
 # Create your views here.
 
+# #--------------------------------------------------------------------
+# class CategoryList(generics.ListCreateAPIView):
+#     #创建前先设置owner
+#     def perform_create(self, serializer):
+#         serializer.save(owner=self.request.user)
+#     queryset = Category.objects.all()
+#     serializer_class = CategorySerializer
+#     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+#
+#
+# class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = Category.objects.all()
+#     serializer_class = CategorySerializer
+#     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+#                           IsOwnerOrReadOnly,)
+# #--------------------------------------------------------------------
+#
+# #------------------------------------------------------------
+# class EntryList(generics.ListCreateAPIView):
+#     # authentication_classes = (BasicAuthentication,)
+#     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+#     def perform_create(self, serializer):
+#         category_text = self.request.data['category.text']
+#         category_objs = Category.objects.filter(text=category_text)
+#         #有对应的category
+#         if category_objs.count() != 0:
+#             serializer.save(category=category_objs[0])
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         else:
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     queryset = Entry.objects.all()
+#     serializer_class = EntrySerializer
+# class EntryDetail(generics.RetrieveUpdateDestroyAPIView):
+#     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+#     queryset = Entry.objects.all()
+#     serializer_class = EntrySerializer
+# #----------------------------------------------------------------------
+#
 
-class CategoryList(generics.ListCreateAPIView):
-    #创建前先设置owner
+
+
+# ViewSet
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly,)
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+# ViewSet
+class EntryViewSet(viewsets.ModelViewSet):
+    # 找出category对应的entry
+    def perform_create(self, serializer):
+        category_text = self.request.data['category.text']
+        category_objs = Category.objects.filter(text=category_text)
+        # 有对应的category
+        if category_objs.count() != 0:
+            serializer.save(category=category_objs[0])
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    queryset = Entry.objects.all()
+    serializer_class = EntrySerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+
+# ViewSet
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+
+
+
+from rest_framework import generics
+from rest_framework import mixins
+# -------------------------------------------------
+class CategoryList(mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
+                  generics.GenericAPIView):
+    queryset = Category.objects.all();
+    serializer_class = CategorySerializer
+    # def list(self, request, *args, **kwargs):
+    #     queryset = self.get_queryset()
+    #     serializer = CategorySerializer(queryset, many=True)
+    #     return Response(serializer.data, headers={'Access-Control-Allow-Origin': '*'})
+
+    def get(self, request, *args, **kwargs):
+        # categorys = Category.objects.all()
+        # serializer = CategorySerializer(categorys, many=True)
+        # return Response(serializer.data, headers={'Access-Control-Allow-Origin': '*'})
+        response = self.list(request, *args, **kwargs)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    def post(self, request, *args, **kwargs):
+        response = self.create(request, *args, **kwargs)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    # def post(self, request, format=None):
+    #     serializer = CategorySerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CategoryDetail(mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin,
+                    generics.GenericAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+    def get(self, request, *args, **kwargs):
+        response = self.retrieve(request, *args, **kwargs)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
 
-#自己写的方法要自己处理异常,用Response
-class EntryList(generics.ListCreateAPIView):
-    queryset = Entry.objects.all()
-    serializer_class = EntrySerializer
+    def put(self, request, *args, **kwargs):
+        response = self.update(request, *args, **kwargs)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+        response = self.update(request, *args, **kwargs)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    # def get_object(self, pk):
+    #     try:
+    #         return Category.objects.get(pk=pk)
+    #     except Category.DoesNotExist:
+    #         raise Http404
+    #
+    # def get(self, request, pk, format=None):
+    #     category = self.get_object(pk)
+    #     serializer = CategorySerializer(category)
+    #     return Response(serializer.data, headers={''})
+    #
+    # def put(self, request, pk, format=None):
+    #     category = self.get_object(pk)
+    #     serializer = CategorySerializer(category, data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #
+    # def delete(self, request, pk, format=None):
+    #     category = self.get_object(pk)
+    #     category.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+# -------------------------------------------------
+class EntryList(APIView):
+    def get(self, request, fromat=None):
+        entrys = Entry.objects.all()
+        serializer = EntrySerializer(entrys, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        serializer = EntrySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class EntryDetail(APIView):
+    def get_object(self, pk):
+        try:
+            return Entry.objects.get(pk=pk)
+        except Entry.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        entry = self.get_object(pk)
+        serializer = EntrySerializer(entry)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        entry = self.get_object(pk)
+        serializer = EntrySerializer(entry, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        entry = self.get_object(pk)
+        entry.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class EntryDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Entry.objects.all()
-    serializer_class = EntrySerializer
 
-def index(request):
-    return render(request, 'address_books/index.html')
+#------------------------------------------------
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+
+
+
+#----------------------最初------------------------------------------
 def check_user(user, owner):
     if user != owner:
         raise Http404
+
+def index(request):
+    return render(request, 'address_books/index.html')
 
 
 #显示分组

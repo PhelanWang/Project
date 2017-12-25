@@ -2,9 +2,6 @@
 
 
 {% block content %}
-
-
-
     <ol class="breadcrumb">
         <li><a href="{% url 'address_books:categorys' 1 %}">分组首页</a></li>
         <li><a href="{% url 'address_books:category' category.id 1 %}">{{ category }}</a></li>
@@ -77,6 +74,7 @@
                 </a>
             </div>
         </div>
+
 
         <div class="text-center">
             <ul class="pagination">

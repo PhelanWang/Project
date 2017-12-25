@@ -1,80 +1,185 @@
-{% extends "address_books/base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 可选的Bootstrap主题文件（一般不使用） -->
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"></script>
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="../../../static/js/AngularJS.js"></script>
+    <script src="../../../static/js/edit_model.js"></script>
+    <title>通讯录首页</title>
+</head>
 
-{% block content %}
-    <div class="panel panel-success">
-        <div class="panel-heading">
-            <h3 class="panel-title">
-                所有分组
-            </h3>
-        </div>
-        <div class="panel-body">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>分组名</th>
-                    <th style="text-align: center;">编辑</th>
-                </tr>
-                </thead>
-                <tbod>
-                    {% for category in categorys %}
-                        <tr>
-                            <th><a href="{% url 'address_books:category' category_id=category.id category_page=1 %}" class="list-group-item">
-                                <span class="glyphicon glyphicon-list-alt"></span> {{ category }}
-                            </a>
-                            </th>
-                            <th style="text-align: center;">
-                                <a href="{% url 'address_books:edit_category' category_id=category.id %}" class="btn btn-default">修改</a> /
-                                <a href="#"  data-toggle="modal" data-target="#myModal" onclick="setcategory('{{ category }}', '{{ category.id }}')" class="btn btn-default">删除</a>
-                            </th>
-                        </tr>
-                    {% endfor %}
-                </tbod>
-            </table>
-            <!-- 模态框（Modal） -->
-            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                                &times;
-                            </button>
-                            <h4 class="modal-title" id="myModalLabel">
-                                确认删除信息
-                            </h4>
+<body>
+<div class="container col-lg-8 col-lg-offset-2">
+    <div class="header clearfix">
+
+        <hr>
+        <nav class="navbar navbar-default" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="{% url 'address_books:index' %}"><span
+                            class="glyphicon glyphicon-book"></span> 通讯录</a>
+                </div>
+
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'address_books:search' %}" class="navbar-form navbar-left"
+                          role="search">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input name="search_name" type="text" class="form-control" placeholder="请输入姓名">
                         </div>
-                        <div class="modal-body">
-                            确定要删除分组<label id="lable_name">aaa</label>吗？
-                            <p id="show_href"></p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                            <a id="delete_submit" href="#" type="button" class="btn btn-default">确定删除</a>
-                        </div>
-                    </div><!-- /.modal-content -->
-                </div><!-- /.modal -->
-            </div>
-        </div>
-        <div class="panel-footer">
-            <a href="{% url 'address_books:new_category' %}" class="list-group-item"><span class="glyphicon glyphicon-folder-plus"></span>
-                <span class="glyphicon glyphicon-plus"></span> 添加分组
-            </a>
-        </div>
-    </div>
-    <div class="text-center">
-        <ul class="pagination">
-            {% if categorys_page != 1 %}
-                <li><a href="{% url 'address_books:categorys' categorys_page|add:'-1' %}">&laquo;</a></li>
-            {% endif %}
-            {% for index in page_list %}
-                {% if categorys_page == index %}
-                    <li class="active"><a href="{% url 'address_books:categorys' index %}">{{ index }}</a></li>
-                {% else %}
-                    <li><a href="{% url 'address_books:categorys' index %}">{{ index }}</a></li>
+                        <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span>
+                            查找
+                        </button>
+                    </form>
                 {% endif %}
-            {% endfor %}
-            {% if categorys_page != page_list|length %}
-                <li><a href="{% url 'address_books:categorys' categorys_page|add:'1' %}">&raquo;</a></li>
-            {% endif %}
-        </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li role="presentation" class="active"><a href="{% url 'address_books:index' %}"><span
+                            class="glyphicon glyphicon-home"></span> 首页</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a><span class="glyphicon glyphicon-user"></span> 你好, {{ user.username }}</a></li>
+                        <li><a href="{% url 'users:logout' %}"><span class="glyphicon glyphicon-log-out"></span> 注销</a>
+                        </li>
+                    {% else %}
+                        <li role="presentation"><a href="{% url 'users:login' %}"><span
+                                class="glyphicon glyphicon-log-in"></span> 登录</a></li>
+                        <li role="presentation"><a href="{% url 'users:register' %}"><span
+                                class="glyphicon glyphicon-user"></span> 注册</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+
+
     </div>
-{% endblock content %}
+    <div class="jumbotron">
+        <div>
+
+
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <h3 class="panel-title" id="all_category">
+                        所有分组
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    <table id="table" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>分组名</th>
+                            <th style="text-align: center;">编辑</th>
+                        </tr>
+                        </thead>
+                        <tbod>
+                            <script>
+                                var app = angular.module('myApp', []);
+                                app.controller('siteCtrl', function ($scope, $http) {
+                                    $http({
+                                        method: 'GET',
+                                        url: '/categorys/'
+                                    }).then(function successCallback(response) {
+                                        alert("success");
+                                        alert(response.data.results[0].text);
+                                        $scope.results = [{"text":'a', 'data_added':'b'}];
+                                        $scope.name = '小明';
+                                    }, function errorCallback(response) {
+                                        alert("error");
+                                    });
+                                });
+                            </script>
+
+                            <div ng-app="myApp" ng-controller="siteCtrl" ng-init="name='a'">
+
+                                <table>
+                                    <tr><td>text</td><td>date_added</td></tr>
+                                    <tr ng-repeat="item in results">
+                                        <td>{{ item.text }}</td>
+                                        <td>{{ item.date_added }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+
+                            {#                    {% for category in categorys %}#}
+                            {#                        <tr>#}
+                            {#                            <th><a id="category_text" href="#" class="list-group-item">#}
+                            {#                                <span class="glyphicon glyphicon-list-alt"></span> {{ category }}#}
+                            {#                            </a>#}
+                            {#                            </th>#}
+                            {#                            <th style="text-align: center;">#}
+                            {#                                <a href="{% url 'address_books:edit_category' category_id=category.id %}" class="btn btn-default">修改</a> /#}
+                            {#                                <a href="#"  data-toggle="modal" data-target="#myModal" onclick="setcategory('{{ category }}', '{{ category.id }}')" class="btn btn-default">删除</a>#}
+                            {#                            </th>#}
+                            {#                        </tr>#}
+                            {#                    {% endfor %}#}
+                        </tbod>
+                    </table>
+                    <!-- 模态框（Modal） -->
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                        &times;
+                                    </button>
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        确认删除信息
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    确定要删除分组<label id="lable_name">aaa</label>吗？
+                                    <p id="show_href"></p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                                    <a id="delete_submit" href="#" type="button" class="btn btn-default">确定删除</a>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal -->
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <a href="{% url 'address_books:new_category' %}" class="list-group-item"><span
+                            class="glyphicon glyphicon-folder-plus"></span>
+                        <span class="glyphicon glyphicon-plus"></span> 添加分组
+                    </a>
+                </div>
+            </div>
+            <div class="text-center">
+                <ul class="pagination">
+                    {% if categorys_page != 1 %}
+                        <li><a href="{% url 'address_books:categorys' categorys_page|add:'-1' %}">&laquo;</a></li>
+                    {% endif %}
+                    {% for index in page_list %}
+                        {% if categorys_page == index %}
+                            <li class="active"><a href="{% url 'address_books:categorys' index %}">{{ index }}</a></li>
+                        {% else %}
+                            <li><a href="{% url 'address_books:categorys' index %}">{{ index }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if categorys_page != page_list|length %}
+                        <li><a href="{% url 'address_books:categorys' categorys_page|add:'1' %}">&raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+
+        </div>
+    </div>
+    <hr>
+    <footer class="footer">
+        <h4>&copy; 2017 Company</h4>
+    </footer>
+</div>
+</body>
+</html>
+
