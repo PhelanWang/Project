@@ -15,10 +15,22 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-import settings
+from address_books import views
+from rest_framework.routers import DefaultRouter
+
+
+router = DefaultRouter()
+router.register(r'categorys', views.CategoryViewSet)
+router.register(r'entrys', views.EntryViewSet)
+router.register(r'users', views.UserViewSet)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'', include('address_books.urls', namespace='address_books')),
-    url(r'^users/', include('users.urls', namespace='users')),
+    # url(r'', include('address_books.urls', namespace='address_books')),
+    # url(r'^users/', include('users.urls', namespace='users')),
+    url(r'^api/', include('address_books.urls', namespace='api_address_books')),
+
+    #---------------------------------------------
+    url(r'^', include(router.urls)),
+    # url(r'^api-auth/', include('users.urls', namespace='users')),
 ]
